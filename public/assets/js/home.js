@@ -24,20 +24,18 @@ function setAuth(setting) {
 function handleFormSubmit(event) {
   event.preventDefault();
 
-if (!email || !password) {
+  let email = $emailInput.val().trim();
+  let password = $passwordInput.val().trim();
+
+  if (!email || !password) {
     displayMessage('Email and password fields cannot be blank.', 'danger');
     return;
   }
 
-//   $emailInput.val('');
-//   $passwordInput.val('');
+  $emailInput.val('');
+  $passwordInput.val('');
 
-//   authenticateUser(email, password);
-// }
-
- console.log(
-    `Email: ${email} Password: ${password} AuthSetting: ${authSetting}`
-  );
+  authenticateUser(email, password);
 }
 
 function displayMessage(message, type) {
@@ -47,6 +45,7 @@ function displayMessage(message, type) {
 function handleSignupResponse(status) {
   if (status === 'success') {
     displayMessage('Registered successfully! You may now sign in.', 'success');
+    setAuth('login');
   } else {
     displayMessage(
       'Something went wrong. A user with this account may already exist.',
@@ -56,7 +55,15 @@ function handleSignupResponse(status) {
 }
 
 function handleLoginResponse(data, status, jqXHR) {
-  console.log(status, data, jqXHR);
+  if (status === 'success') {
+    let jwt = jqXHR.getResponseHeader('authorization');
+    let user = JSON.stringify(data);
+
+    localStorage.setItem('authorization', jwt);
+    localStorage.setItem('user', user);
+  } else {
+    displayMessage('Invalid email or password.', 'danger');
+  }
 }
 
 function authenticateUser(email, password) {
@@ -73,7 +80,7 @@ function authenticateUser(email, password) {
     .then(function(data, status, jqXHR) {
       if (authSetting === 'signup') {
         handleSignupResponse(status);
-        } else {
+      } else {
         handleLoginResponse(data, status, jqXHR);
       }
     })
