@@ -71,7 +71,7 @@ function createCards(list) {
 
 function createLists(lists) {
   let $listContainers = lists.map(function(list) {
-    let $listContainer = $('<div class="list">').data(list);
+    let $listContainer = $('<div class="list">').data('id', list.id);
     let $header = $('<header>');
     let $headerButton = $('<button>')
       .text(list.title)
@@ -111,7 +111,10 @@ function renderBoard() {
   $boardContainer.append($lists);
 
   makeSortable();
-  renderContributors();
+}
+
+function makeSortable() {
+  Sortable.create($boardContainer[0]);
 }
 
 function renderContributors() {
@@ -122,70 +125,6 @@ function renderContributors() {
 
   $contributorModalList.empty();
   $contributorModalList.append($contributorListItems);
-}
-
-function makeSortable() {
-   Sortable.create($boardContainer[0], {
-    animation: 600,
-    ghostClass: 'ghost',
-    filter: '.add',
-    easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-    onMove: function(event) {
-      let shouldMove = !$(event.related).hasClass('add');
-      return shouldMove;
-    },
-      onEnd: function(event) {
-      let { id, position } = $(event.item).data();
-      let newPosition = event.newIndex + 1;
-
-      if (position === newPosition) {
-        return;
-      }
-
-      $.ajax({
-        url: `/api/lists/${id}`,
-        data: {
-          position: newPosition
-        },
-        method: 'PUT'
-      }).then(function() {
-        init();
-      });
-    }
-  });
-
-   $('.list > ul').each(function(index, element) {
-      Sortable.create(element, {
-        animation: 150,
-        ghostClass: 'ghost',
-        easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
-        group: 'shared',
-        onEnd: function(event) {
-             let { id, position, list_id } = $(event.item)
-          .find('button')
-          .data();
-        let newPosition = event.newIndex + 1;
-        let newListId = $(event.item)
-          .parents('.list')
-          .data('id');
-
-        if (position === newPosition && list_id === newListId) {
-          return;
-        }
-
-        $.ajax({
-          url: `/api/cards/${id}`,
-          method: 'PUT',
-          data: {
-            list_id: newListId,
-            position: newPosition
-          }
-        }).then(function() {
-          init();
-        });
-      }
-    });
-  });
 }
 
 function openListCreateModal() {
