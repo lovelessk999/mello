@@ -71,7 +71,7 @@ function createCards(list) {
 
 function createLists(lists) {
   let $listContainers = lists.map(function(list) {
-    let $listContainer = $('<div class="list">').data('id', list.id);
+    let $listContainer = $('<div class="list">').data(list);
     let $header = $('<header>');
     let $headerButton = $('<button>')
       .text(list.title)
@@ -114,7 +114,21 @@ function renderBoard() {
 }
 
 function makeSortable() {
-  Sortable.create($boardContainer[0]);
+  Sortable.create($boardContainer[0], {
+    animation: 150,
+    ghostClass: 'ghost',
+    filter: '.add',
+    easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
+    onMove: function(event) {
+      let shouldMove = !$(event.related).hasClass('add');
+      return shouldMove;
+    },
+    onEnd: function(event) {
+      let data = $(event.item).data();
+      console.log(listData);
+      console.log(event.newIndex);
+    }
+  });
 }
 
 function renderContributors() {
@@ -337,7 +351,7 @@ function handleContributorSave(event) {
 }
 
 $contributorModalSaveButton.on('click', handleContributorSave);
-$contributorModalButton.on('click', openContributorModal);
+// $contributorModalButton.on('click', openContributorModal);
 $saveCardButton.on('click', handleCardCreate);
 $saveListButton.on('click', handleListCreate);
 $logoutButton.on('click', handleLogout);
