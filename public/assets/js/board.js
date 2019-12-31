@@ -124,9 +124,22 @@ function makeSortable() {
       return shouldMove;
     },
     onEnd: function(event) {
-      let data = $(event.item).data();
-      console.log(listData);
-      console.log(event.newIndex);
+      let { id, position } = $(event.item).data();
+      let newPosition = event.newIndex + 1;
+
+      if (position === newPosition) {
+        return;
+      }
+
+      $.ajax({
+        url: `/api/lists/${id}`,
+        data: {
+          position: newPosition
+        },
+        method: 'PUT'
+      }).then(function() {
+        init();
+      });
     }
   });
 }
