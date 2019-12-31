@@ -77,7 +77,7 @@ function createLists(lists) {
       .text(list.title)
       .data(list)
       .on('click', openListEditModal);
-      let $cardUl = createCards(list);
+    let $cardUl = createCards(list);
     let $addCardButton = $('<button>Add a card...</button>').on(
       'click',
       openCardCreateModal
@@ -142,6 +142,39 @@ function makeSortable() {
       });
     }
   });
+
+  $('.list > ul').each(function(index, element) {
+    Sortable.create(element, {
+      animation: 150,
+      ghostClass: 'ghost',
+      easing: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)',
+      group: 'shared',
+      onEnd: function(event) {
+        let { id, position, list_id } = $(event.item)
+          .find('button')
+          .data();
+        let newPosition = event.newIndex + 1;
+        let newListId = $(event.item)
+          .parents('.list')
+          .data('id');
+
+        if (position === newPosition && list_id === newListId) {
+          return;
+        }
+
+        $.ajax({
+          url: `/api/cards/${id}`,
+          method: 'PUT',
+          data: {
+            list_id: newListId,
+            position: newPosition
+          }
+        }).then(function() {
+          init();
+        });
+      }
+    });
+    });
 }
 
 function renderContributors() {
