@@ -111,6 +111,17 @@ function renderBoard() {
   $boardContainer.append($lists);
 
   makeSortable();
+  renderContributors();
+}
+
+function renderContributors() {
+  let $contributorListItems = board.users.map(function(user) {
+    let $contributorListItem = $('<li>').text(user.email);
+    return $contributorListItem;
+  });
+
+  $contributorModalList.empty();
+  $contributorModalList.append($contributorListItems);
 }
 
 function makeSortable() {
@@ -358,7 +369,7 @@ function handleContributorSave(event) {
   $contributorModalInput.val('');
 
   if (!emailRegex.test(contributorEmail)) {
-     displayMessage(`Must provide a valid email address`, 'danger');
+    displayMessage(`Must provide a valid email address`, 'danger');
     return;
   }
 
@@ -367,7 +378,7 @@ function handleContributorSave(event) {
   });
 
   if (contributor) {
-     displayMessage(
+    displayMessage(
       `${contributorEmail} already has access to the board`,
       'danger'
     );
@@ -381,13 +392,14 @@ function handleContributorSave(event) {
       email: contributorEmail,
       board_id: board.id
     }
-  }).then(function() {
-    init();
-    displayMessage(
+  })
+    .then(function() {
+      init();
+      displayMessage(
         `Successfully added ${contributorEmail} to the board`,
         'success'
       );
-  })
+    })
     .catch(function() {
       displayMessage(
         `Cannot find user with email: ${contributorEmail}`,
@@ -396,8 +408,16 @@ function handleContributorSave(event) {
     });
 }
 
+function openContributorModal() {
+  $contributorModalInput.val('');
+  displayMessage('');
+
+  MicroModal.show('contribute');
+}
+
+
 $contributorModalSaveButton.on('click', handleContributorSave);
-// $contributorModalButton.on('click', openContributorModal);
+$contributorModalButton.on('click', openContributorModal);
 $saveCardButton.on('click', handleCardCreate);
 $saveListButton.on('click', handleListCreate);
 $logoutButton.on('click', handleLogout);
